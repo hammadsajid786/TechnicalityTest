@@ -11,36 +11,24 @@ namespace TechnicalityTestAPI.Controllers
     [Route("[controller]")]
     public class CCChargeController : ControllerBase
     {
-        
-        private readonly ApiDbContext _context;
-        
-        public CCChargeController(ApiDbContext context)
+        private readonly ICCChargeService _CChargeService;
+
+        public CCChargeController(ICCChargeService cChargeService)
         {
-            _context = context;
+            _CChargeService = cChargeService;
         }
 
         [HttpGet]
         public List<CCChargeViewModel> Get(int id)
         {
             // id is CustomerId
-
-            return _context.CreditCardCharges.Where(c => c.CustomerId == id).Select(c =>
-                new CCChargeViewModel { CustomerId = c.CustomerId, Amount = c.Amount }).ToList();
+            return _CChargeService.GetCharges(id);
         }
 
         [HttpPost]
         public int CreateCCCharge(CCChargeViewModel model)
         {
-            var ccc = new CreditCardCharge();
-            ccc.CustomerId = model.CustomerId;
-            ccc.Amount = model.Amount;
-            ccc.ChargeDateTime = DateTime.UtcNow;
-
-            _context.CreditCardCharges.Add(ccc);
-            _context.SaveChanges();
-
-            return ccc.CreditCardChargeId;
-
+            return _CChargeService.CreateCCCharge(model.CustomerId, model.Amount);
         }
     }
 }
