@@ -132,6 +132,22 @@ namespace TechnicalityTestWebApp.Controllers
                 try
                 {
                     _context.Update(payment);
+
+                    if (payment.CreditCardChargeId != null) // If we have an entry in CreditChardCharges table then update them as well.
+                    {
+                        // Call Update Credit Card API 
+                        var vm = new Models.CCChargeViewModel
+                        {
+                            ChargeId = payment.CreditCardChargeId.Value,
+                            Amount = payment.Amount
+                        };
+
+                        var chargeJson = JsonSerializer.Serialize(vm);
+                        var requestContent = new StringContent(chargeJson, Encoding.UTF8, "application/json");
+                        var url = _config["ApiUrl"] + "/CCCharge";
+                        var response = await _httpClient.PutAsync(url, requestContent);
+                    }
+
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
